@@ -1,0 +1,11 @@
+Steps for Each New Session
+
+- Launch Ganache and start a new Quickstart session.
+Redeploy the Smart Contract:
+- Update "from" in truffle-config.js to 1:st address in Ganache.
+- Open a terminal in your Truffle project directory.
+- Run: "truffle migrate --reset --network development"
+Run Scripts:
+- Update Contract Address in Python Scripts, to the new one from Ganache
+- Run the Aggregator Script
+- Run Node Scripts
