@@ -1,4 +1,5 @@
-Experimental guide
+Experimental guide.
+Steps for running simulations:
 
 - Launch a Ganache Blockchain
 - Copy address[0] to truffle-config.js
