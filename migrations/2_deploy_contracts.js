@@ -1,5 +1,5 @@
-const NumberListContract = artifacts.require("NumberListContract");
+const NeuralNetworkWeights = artifacts.require("NeuralNetworkWeights");
 
 module.exports = function (deployer) {
-    deployer.deploy(NumberListContract);
+  deployer.deploy(NeuralNetworkWeights);
 };

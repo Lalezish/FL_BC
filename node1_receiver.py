@@ -1,8 +1,8 @@
-from web3 import Web3
-import numpy as np
-import tensorflow as tf
 import os
+
+from web3 import Web3
 import ipfshttpclient
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
@@ -13,7 +13,7 @@ from preprocessing import x_test, y_test
 web3 = Web3(Web3.HTTPProvider('http://127.0.0.1:7545'))
 
 # Smart Contract Details
-contract_address = '0x2fcfAe11b277157c27B12B182FE61c53D6fd1691'
+contract_address = '0x2fcfAe11b277157c27B12B182FE61c53D6fd1691'  # Replace with your contract address
 contract_abi = [
     {
       "inputs": [],
@@ -248,12 +248,10 @@ def build_model(input_shape):
     model.add(Dense(32, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(1, activation='sigmoid'))
-
     model.compile(optimizer=Adam(learning_rate=0.001),
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
     return model
-
 def load_weights_from_ipfs(model, weights_hash):
     client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001')
     client.get(weights_hash)
@@ -281,52 +279,22 @@ def test_model(model, x_test, y_test):
     auc = roc_auc_score(y_test, y_pred_probs)
     return auc
 
-def average_weights(weights_list):
-    # Suboptimal, but sufficent method of merging models
-    # Average the weights from different models
-    avg_weights = []
-    for weights in zip(*weights_list):
-        layer_mean = np.mean(np.array(weights), axis=0)
-        avg_weights.append(layer_mean)
-    return avg_weights
-
-def save_and_upload_weights_to_ipfs(model):
-    # Save model weights to a file
-    model.save_weights("aggregated_model_weights.h5")
-
-    # Connect to IPFS
-    client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001')
-
-    # Add file to IPFS
-    res = client.add("aggregated_model_weights.h5")
-    weights_hash = res['Hash']
-    print("Uploaded aggregated weights to IPFS with hash:", weights_hash)
-    return weights_hash
-
 if __name__ == "__main__":
     input_shape = x_test.shape[1]  # Assuming x_test is a 2D array
     model = build_model(input_shape)
 
-    all_weights = []  # List to store weights from each node
+    # Retrieve the IPFS hash of the aggregated model's weights
+    aggregated_weights_hash = contract.functions.getAggregatedWeightsHash().call()
 
-    for node_id in range(1, 4):  # 3 Nodes
-        weights_hash = contract.functions.getNodeWeightsHash(node_id).call()
-        load_weights_from_ipfs(model, weights_hash)
-        all_weights.append(model.get_weights())
+    # Load the aggregated weights into the model
+    load_weights_from_ipfs(model, aggregated_weights_hash)
 
-    # Average the weights
-    averaged_weights = average_weights(all_weights)
-    model.set_weights(averaged_weights)  # Set the averaged weights to the model
+    # Use the aggregated model to predict and evaluate on the test set
+    auc_score = test_model(model, x_test, y_test)
+    print(f"Aggregated Model AUC on Test Set: {auc_score}")
 
-    # Save and upload the aggregated weights to IPFS
-    aggregated_weights_hash = save_and_upload_weights_to_ipfs(model)
-
-    # Store the IPFS hash of the aggregated weights in the blockchain
-    tx_hash = contract.functions.storeAggregatedWeights(aggregated_weights_hash).transact({
-        'from': web3.eth.accounts[0]
-    })
-    web3.eth.wait_for_transaction_receipt(tx_hash)
-
-    # Test the combined model
-    combined_auc_score = test_model(model, x_test, y_test)
-    print(f"Combined Model AUC: {combined_auc_score}")
+    # Print node 1 model for comparison
+    #weights_hash = contract.functions.getNodeWeightsHash(1).call()
+    #load_weights_from_ipfs(model, weights_hash)
+    #auc_score = test_model(model, x_test, y_test)
+    #print(f"Node 1 AUC on Test Set: {auc_score}")

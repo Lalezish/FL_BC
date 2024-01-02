@@ -1,11 +1,11 @@
-Steps for Each New Session
+Experimental guide
 
-- Launch Ganache and start a new Quickstart session.
-Redeploy the Smart Contract:
-- Update "from" in truffle-config.js to 1:st address in Ganache.
-- Open a terminal in your Truffle project directory.
-- Run: "truffle migrate --reset --network development"
-Run Scripts:
-- Update Contract Address in Python Scripts, to the new one from Ganache
-- Run the Aggregator Script
-- Run Node Scripts
+- Launch a Ganache Blockchain
+- Copy address[0] to truffle-config.js
+- Create IPFS daemon | ipfs daemon
+- Deploy contract | truffle migrate --network development
+- Copy contract address to: setup, node1, node2, node3, aggregator, node1_receiver
+- Run setup script | python setup.py
+- Run node scripts | python node1.py, python node2.py, python node3.py
+- Run aggregator script | python aggregator.py
+- Run receiver script | python node1_receiver.py
