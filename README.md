@@ -17,6 +17,7 @@ Once the aggregator has added their chosen collaborators, each federated learnin
 - Each node replaces their local model with the downloaded aggregated model weights.
 
 ### Setup overview
+The following figure describes the projects flow of communication
  ![FL_BC (1)](https://github.com/Lalezish/FL_BC/assets/78786599/134cc094-f690-47bb-b25a-526b670eb2ba)
 
 ## Simulation necessities
